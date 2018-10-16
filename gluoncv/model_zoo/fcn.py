@@ -52,20 +52,27 @@ class FCN(SegBaseModel):
 
     def hybrid_forward(self, F, x):
         c3, c4 = self.base_forward(x)
+        """layer3, layer4 from backbone
+        c4: [batch_size, 2048, ?, ?] shape.
+        c3: [batch_size, 1024, ?, ?] shape"""
 
         outputs = []
-        x = self.head(c4)
-        x = F.contrib.BilinearResize2D(x, **self._up_kwargs)
-        outputs.append(x)
+        x = self.head(c4) # this x is batch_size * classnum_channel * 1 * 1 mat; x is conv7?
+        """FCNHeadBlock conv, norm, active, dropout, 1x1 conv to classnum channels."""
+        x = F.contrib.BilinearResize2D(x, **self._up_kwargs) # this x is bilinearresized: [h, w/ w, h]
+        outputs.append(x) # missing layer4_bilinear append to outputs.
+        print('output', outputs.shape) 
 
-        if self.aux:
-            auxout = self.auxlayer(c3)
-            auxout = F.contrib.BilinearResize2D(auxout, **self._up_kwargs)
+        if self.aux: # default True
+            auxout = self.auxlayer(c3) # this auxout: [ batch_size, classnum_channel, 1, 1] shape
+            auxout = F.contrib.BilinearResize2D(auxout, **self._up_kwargs) # bilinearresize upto h, w or flipped.
             outputs.append(auxout)
+        print('output', outputs.shape)
         return tuple(outputs)
 
 
 class _FCNHead(HybridBlock):
+    """FCNHeadBlock conv, norm, active, dropout, 1x1 conv to classnum channels."""
     # pylint: disable=redefined-outer-name
     def __init__(self, in_channels, channels, norm_layer=nn.BatchNorm, norm_kwargs={}):
         super(_FCNHead, self).__init__()
