@@ -28,6 +28,11 @@ Start Training Now
 Dive into Deep
 ~~~~~~~~~~~~~~
 """
+import sys, os
+sys.path.append(os.path.dirname(os.getcwd()))
+sys.path.append(os.getcwd())
+sys.path.append('/home/luban/hphp_gluon-cv/gluoncv')
+print(sys.path)
 import numpy as np
 import mxnet as mx
 from mxnet import gluon, autograd
@@ -190,7 +195,7 @@ plt.show()
 #     Additionally, an Auxiliary Loss as in PSPNet [Zhao17]_ at Stage 3 can be enabled when
 #     training with command ``--aux``. This will create an additional FCN "head" after Stage 3.
 #
-from gluoncv.loss import MixSoftmaxCrossEntropyLoss
+from hphp_gluoncv.gluoncv.loss import MixSoftmaxCrossEntropyLoss
 criterion = MixSoftmaxCrossEntropyLoss(aux=True)
 
 ##############################################################################
